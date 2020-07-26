@@ -177,9 +177,7 @@ func Parse(logger log.Logger,data []byte) *families.Project {
 
 			for k,_:=range nametagmap{
 
-				validateXml:= taskValidMap[k]
-
-				if validateXml!=nil {
+				if validateXml,ok := taskValidMap[k]; ok{
 
 					validateXml.SetLogger(logger)
 					validateXml.SetContent(txlContent)

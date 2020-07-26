@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"goant/log"
 	"os"
+	"os/exec"
 )
 
 const (
 	MKDIR ="mkdir"
 	ECHO="echo"
+	JAVAC="javac"
 )
 
 
@@ -68,3 +70,41 @@ func (echo *EchoTask) Exec(){
 
 }
 //echo task end
+
+
+//javac task start
+type JavacTask struct {
+
+	TaskBase
+	Srcpath string
+	Despath string
+	Classpath string
+}
+
+func (javac *JavacTask) Exec(){
+
+	var cmd *exec.Cmd
+
+	var strCmd string = "javac"
+	var args1 string = javac.Srcpath
+	var args2 string = " -d "+javac.Despath
+
+	if javac.Classpath==""{
+
+		cmd= exec.Command(strCmd,args1,args2)
+
+	}else{
+
+		var args3 string = " -classpath "+javac.Classpath
+		cmd= exec.Command(strCmd,args1,args3,args2)
+
+	}
+
+	err:=cmd.Run()
+
+	if err!=nil {
+
+		panic(err)
+	}
+}
+//javac task end

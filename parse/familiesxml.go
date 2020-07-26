@@ -11,6 +11,7 @@ import (
 const (
 	MKDIR ="mkdir"
 	ECHO="echo"
+	JAVAC="javac"
 )
 
 var taskValidMap map[string]ValidateTaskXML = make(map[string]ValidateTaskXML,0)
@@ -22,6 +23,8 @@ func init(){
 	taskValidMap[MKDIR] = &MkDirValidateTaskXML{}
 	//echo
 	taskValidMap[ECHO] = &EchoValidateTaskXML{}
+	//javac
+	taskValidMap[JAVAC] = &JavacValidateTaskXML{}
 }
 
 type ProjectXML struct {
@@ -159,3 +162,108 @@ func (echo *EchoValidateTaskXML) ValidateAndInit(t *families.Target){
 	t.AddTask(echoTask)
 }
 //echo task end
+
+//javac task start
+type JavacValidateTaskXML struct {
+
+	ValidateTaskXMLBase
+}
+
+func (javac *JavacValidateTaskXML) ValidateAndInit(t *families.Target){
+
+	var src string="src"
+	var dest string="dest"
+	var cp string="classpath"
+	var path string="path"
+
+	var srcpath string
+	var destpath string
+	var classpath string
+
+	ntm:=javac.nametagmap
+
+	ele:=ntm[JAVAC]
+
+	for _,attr := range ele.Attr{
+
+		if attr.Name.Local == src {
+
+			srcpath = attr.Value
+		}
+
+		if attr.Name.Local == dest {
+
+			destpath = attr.Value
+		}
+
+		if attr.Name.Local == cp {
+
+			classpath = attr.Value
+		}
+
+	}
+
+	//src element
+	ele = ntm[src]
+
+	for _,attr:=range ele.Attr{
+
+		if attr.Name.Local == path {
+
+			srcpath = attr.Value
+		}
+	}
+
+	//dest element
+	ele = ntm[dest]
+
+	for _,attr:=range ele.Attr{
+
+		if attr.Name.Local == path {
+
+			destpath = attr.Value
+		}
+	}
+
+	if ele,ok := ntm[cp]; ok {
+
+		for _,attr:=range ele.Attr{
+
+			if attr.Name.Local == path {
+
+				classpath = attr.Value
+			}
+		}
+	}
+
+
+
+
+	if srcpath==""{
+
+		strErr:= fmt.Sprintf("%s target , %s task must have src",t.Name,JAVAC)
+		panic(strErr)
+
+	}
+
+	if destpath==""{
+
+		strErr:= fmt.Sprintf("%s target , %s task must have dest",t.Name,JAVAC)
+		panic(strErr)
+
+	}
+
+
+	javacTask:=&families.JavacTask{
+
+		Srcpath:srcpath,
+		Despath:destpath,
+		Classpath:classpath,
+	}
+
+	javacTask.SetLogger(javac.logger)
+
+	t.AddTask(javacTask)
+
+}
+//javac task end
